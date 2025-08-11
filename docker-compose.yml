@@ -1,0 +1,48 @@
+services:
+  # Serviço do banco de dados
+  db:
+    image: mysql:8.0
+    container_name: poc_chat_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: 'laravel_chat_poc'
+      MYSQL_USER: 'sail'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Serviço do Soketi
+  soketi:
+    image: quay.io/soketi/soketi:latest
+    container_name: poc_chat_soketi
+    restart: unless-stopped
+    environment:
+      SOKETI_DEBUG: '1'
+      PUSHER_APP_ID: 'app-id'
+      PUSHER_APP_KEY: 'app-key'
+      PUSHER_APP_SECRET: 'app-secret'
+    ports:
+      - '6001:6001'
+    depends_on:
+      - db
+
+  # Novo serviço para o Frontend
+  frontend:
+    container_name: poc_chat_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - soketi
+
+volumes:
+  db_data:
+    driver: local
