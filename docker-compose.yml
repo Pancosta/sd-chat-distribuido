@@ -1,4 +1,17 @@
 services:
+  # Serviço do Backend Laravel
+  backend:
+    container_name: poc_chat_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - db
+      - soketi
   # Serviço do banco de dados
   db:
     image: mysql:8.0
