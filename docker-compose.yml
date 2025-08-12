@@ -1,4 +1,17 @@
 services:
+   # NGINX: Agora é o nosso ponto de entrada (porta 80)
+  nginx:
+    image: nginx:alpine
+    container_name: poc_chat_nginx
+    restart: unless-stopped
+    ports:
+      - '8080:80' # A porta principal do nosso projeto
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - backend
+      - frontend
+
   # Serviço do Backend Laravel
   backend:
     container_name: poc_chat_backend

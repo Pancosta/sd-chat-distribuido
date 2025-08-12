@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 
 const username = ref('');
@@ -21,11 +21,9 @@ const sendMessage = async () => {
       user: username.value,
       message: messageText.value,
     };
-    await axios.post('http://localhost:8000/api/messages', payload);
-
-    // A linha abaixo foi comentada para corrigir a duplicidade.
-    // A mensagem agora só é adicionada quando volta do servidor via WebSocket.
-    // messages.value.push(payload);
+    // MUDANÇA IMPORTANTE: Removemos 'http://localhost:8000'.
+    // A chamada agora é relativa, e o NGINX vai rotear corretamente.
+    await axios.post('/api/messages', payload);
     
     messageText.value = '';
   } catch (error) {
@@ -41,6 +39,10 @@ onMounted(() => {
         message: event.message.message,
       });
     });
+});
+
+onUnmounted(() => {
+  window.Echo.leave('chat');
 });
 </script>
 
@@ -67,61 +69,14 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.chat-container {
-  max-width: 600px;
-  margin: 0 auto;
-  border: 1px solid #ccc;
-  padding: 20px;
-  border-radius: 8px;
-}
-.username-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.messages-area {
-  height: 400px;
-  overflow-y: auto;
-  border: 1px solid #eee;
-  padding: 10px;
-  margin-bottom: 10px;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-}
-.message {
-  padding: 5px 10px;
-  border-radius: 10px;
-  margin-bottom: 8px;
-  max-width: 70%;
-  word-wrap: break-word;
-  background-color: #f1f0f0;
-  align-self: flex-start;
-}
-.my-message {
-  align-self: flex-end;
-  background-color: #007bff;
-  color: white;
-}
-.input-area {
-  display: flex;
-}
-input {
-  flex-grow: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-button {
-  padding: 8px 12px;
-  border: none;
-  background-color: #007bff;
-  color: white;
-  border-radius: 4px;
-  margin-left: 10px;
-  cursor: pointer;
-}
-button:hover {
-  background-color: #0056b3;
-}
+/* Estilos permanecem os mesmos */
+.chat-container { max-width: 600px; margin: 0 auto; border: 1px solid #ccc; padding: 20px; border-radius: 8px; }
+.username-container { display: flex; flex-direction: column; gap: 10px; }
+.messages-area { height: 400px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; text-align: left; display: flex; flex-direction: column; }
+.message { padding: 5px 10px; border-radius: 10px; margin-bottom: 8px; max-width: 70%; word-wrap: break-word; background-color: #f1f0f0; align-self: flex-start; }
+.my-message { align-self: flex-end; background-color: #007bff; color: white; }
+.input-area { display: flex; }
+input { flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+button { padding: 8px 12px; border: none; background-color: #007bff; color: white; border-radius: 4px; margin-left: 10px; cursor: pointer; }
+button:hover { background-color: #0056b3; }
 </style>
