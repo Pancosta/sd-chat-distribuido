@@ -22,7 +22,7 @@ const sendMessage = async () => {
       user: username.value,
       message: messageText.value,
     }
-    await axios.post('/api/messages', payload)
+    await axios.post('http://localhost:8000/api/messages', payload)
     messageText.value = ''
   } catch (error) {
     console.error('Error sending message:', error)
